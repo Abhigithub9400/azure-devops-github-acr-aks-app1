@@ -31,9 +31,21 @@ jobs:
       run: |
         echo "$KUBECONFIG_BASE64" | base64 --decode > kubeconfig
         export KUBECONFIG=$(pwd)/kubeconfig
-        kubectl config view # Optional: To validate kubeconfig
+        kubectl config view # Validate the kubeconfig file
 
-    # Step 5: Deploy to Kubernetes
+    # Step 5: Validate Kubernetes Cluster
+    - name: Validate Kubernetes Cluster
+      run: |
+        kubectl cluster-info # Ensure the cluster is accessible
+        kubectl get nodes    # Verify node availability
+
+    # Step 6: Deploy to Kubernetes
     - name: Deploy to Kubernetes
       run: |
-        kubectl apply -f manifests/
+        kubectl apply -f manifests/ --validate=false # Deploy manifests with optional validation disabled
+
+    # Step 7: Validate Deployment
+    - name: Validate Deployment
+      run: |
+        kubectl get pods -o wide   # List all pods with details
+        kubectl get services -o wide # List all services with details

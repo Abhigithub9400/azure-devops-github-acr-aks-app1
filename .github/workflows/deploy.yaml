@@ -24,10 +24,16 @@ jobs:
       run: |
         docker pull ${{ secrets.DOCKER_USERNAME }}/githubaction:latest
 
-    # Step 4: Deploy Docker image to Kubernetes
-    - name: Deploy to Kubernetes
+    # Step 4: Configure kubeconfig
+    - name: Configure kubeconfig
       env:
-        KUBECONFIG: ${{ secrets.KUBECONFIG_BASE64 }}
+        KUBECONFIG_BASE64: ${{ secrets.KUBECONFIG_BASE64 }}
       run: |
-        echo "$KUBECONFIG" | base64 --decode > kubeconfig
+        echo "$KUBECONFIG_BASE64" | base64 --decode > kubeconfig
+        export KUBECONFIG=$(pwd)/kubeconfig
+        kubectl config view # Optional: To validate kubeconfig
+
+    # Step 5: Deploy to Kubernetes
+    - name: Deploy to Kubernetes
+      run: |
         kubectl apply -f k8s/deployment.yaml
